@@ -28,3 +28,17 @@ DATA = {
 #     'ингредиент2': количество2,
 #   }
 # }
+
+
+def get_recipe(request, recipe, servings=1):
+    template_name = f'calculator/index.html'
+    recipe_query = DATA[recipe]
+    context = {}
+    context[recipe] = recipe_query
+    for recipe, ingridients in context.items():
+        for product, gr in ingridients.items():
+            ingridients[product] = float(gr) * servings
+
+        context[recipe] = ingridients
+    return render(request, template_name, {'recipe': context})
+

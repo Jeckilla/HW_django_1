@@ -1,3 +1,4 @@
+from django.http import HttpResponse
 from django.shortcuts import render
 
 DATA = {
@@ -29,16 +30,23 @@ DATA = {
 #   }
 # }
 
+def home_page(request):
+    template_home = 'home.html'
+    context = DATA
+    return render(request, template_home, {'recipe': context})
 
-def get_recipe(request, recipe, servings=1):
+def get_recipe(request, recipe):
     template_name = f'calculator/index.html'
-    recipe_query = DATA[recipe]
-    context = {}
-    context[recipe] = recipe_query
-    for recipe, ingridients in context.items():
-        for product, gr in ingridients.items():
-            ingridients[product] = float(gr) * servings
-
-        context[recipe] = ingridients
+    servings = int(request.GET.get('servings', 1))
+    if recipe in DATA:
+        recipe_query = DATA[recipe]
+        context = {}
+        context[recipe] = recipe_query
+        for recipe, ingridients in context.items():
+            for product, gr in ingridients.items():
+                ingridients[product] = float(gr) * servings
+            context = {recipe: ingridients}
+    else:
+        context = {}
     return render(request, template_name, {'recipe': context})
 

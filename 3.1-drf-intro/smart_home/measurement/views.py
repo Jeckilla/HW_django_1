@@ -23,6 +23,6 @@ class SensorCreateAPIView(CreateAPIView):
     serializer_class = SensorDetailSerializer
 
 
-class SensorDetailView(RetrieveAPIView):
+class SensorDetailView(RetrieveUpdateAPIView):
     queryset = Sensor.objects.all()
     serializer_class = SensorDetailSerializer

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from stocks_products.logistic.models import Product, Stock
+from logistic.models import Product, Stock, StockProduct
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -15,8 +15,13 @@ class ProductPositionSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'description']
 
 
+class ProductStockSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StockProduct
+        fields = ['product', 'quantity', 'price']
+
 class StockSerializer(serializers.ModelSerializer):
-    positions = ProductPositionSerializer(many=True)
+    positions = ProductStockSerializer(many=True)
 
     class Meta:
         model = Stock
@@ -27,12 +32,18 @@ class StockSerializer(serializers.ModelSerializer):
         # достаем связанные данные для других таблиц
         positions = validated_data.pop('positions')
 
+
         # создаем склад по его параметрам
         stock = super().create(validated_data)
 
-        # здесь вам надо заполнить связанные таблицы
-        # в нашем случае: таблицу StockProduct
-        # с помощью списка positions
+        for position in positions:
+            new_stock_and_prod = StockProduct(
+                stock=stock,
+                product=position['product'],
+                quantity=position['quantity'],
+                price=position['price'],
+            )
+            new_stock_and_prod.save()
 
         return stock
 
@@ -43,8 +54,10 @@ class StockSerializer(serializers.ModelSerializer):
         # обновляем склад по его параметрам
         stock = super().update(instance, validated_data)
 
-        # здесь вам надо обновить связанные таблицы
-        # в нашем случае: таблицу StockProduct
-        # с помощью списка positions
+        for position in positions:
+            instance.stock=stock,
+            instance.product=position['product']
+            instance.quantity=position['quantity']
+            instance.price=position['price']
 
-        return stock
+        return instance

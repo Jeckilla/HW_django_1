@@ -1,0 +1,56 @@
+name: Testing and deployment django project
+
+on:
+  push:
+    branches:
+      - video
+      - main
+
+jobs:
+  testing:
+    runs-on: ubuntu-22.04
+    env:
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      IS_DEBUG: ${{ secrets.DJANGO_DEBUG }}
+      ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
+      ENGINE: ${{ secrets.DB_ENGINE }}
+      USERNAME: ${{ secrets.DATABASE_USER }}
+      PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+      HOST: ${{ secrets.DATABASE_HOST }}
+      PORT: ${{ secrets.DATABASE_PORT }}
+      NAME: ${{ secrets.DATABASE_NAME }}
+    services:
+      postgresql_service:
+        image: postgres:12
+        env:
+          POSTGRES_DB: ${{ env.NAME }}
+          POSTGRES_USER: ${{ env.USERNAME }}
+          POSTGRES_PASSWORD: ${{ env.PASSWORD }}
+        ports:
+          - 5432:5432
+        options:
+          --health-cmd pg_isready
+          --health_interval 5s
+          --health_timeout 5s
+          --health_retries 5
+    steps:
+      - name: Проверка наличия изменений в репозитории
+        uses: actions/checkout@v3
+
+      - name: Установка python и доп библиотек
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Установка зависимостей проекта
+        run: pipm install -r requirements.txt
+
+      - name: Линтинг
+        run: flake8 logistic --exclude logistic/migrations
+
+
+      - name: Тестирование проекта
+        run: python manage.py test
+#        run: pytest
+
+

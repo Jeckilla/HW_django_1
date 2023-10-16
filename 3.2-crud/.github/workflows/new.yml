@@ -63,4 +63,19 @@ jobs:
           DB_NAME: ${{ env.NAME }}
 
 
+      - name: Деплой
+        uses: appleboy/ssh-actions@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          script: |
+            cd /home/jeckilla/HW_django_1/3.2-crud/stocks_products
+            git pull origin video
+            source venv/Script/activate
+            pip install -r requirements.txt
+            python manage.py migrate
+            sudo systemctl restart gunicorn
+
+
 

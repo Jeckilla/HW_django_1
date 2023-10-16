@@ -51,6 +51,16 @@ jobs:
 
       - name: Тестирование проекта
         run: python manage.py test
-#        run: pytest
+        env:
+          SECRET_KEY: ${{ env.SECRET_KEY }}
+          DEBUG: ${{ env.IS_DEBUG }}
+          ALLOWED_HOSTS: ${{ env.ALLOWED_HOSTS }}
+          DB_ENGINE: ${{ env.ENGINE }}
+          DB_USERNAME: ${{ env.USERNAME }}
+          DB_PASSWORD: ${{ env.PASSWORD }}
+          DB_HOST: ${{ env.HOST }}
+          DB_PORT: ${{ env.PORT }}
+          DB_NAME: ${{ env.NAME }}
+
 
 
